@@ -224,7 +224,15 @@ async function createTask(db, taskData) {
  * Hint: updateOne + $set.
  */
 async function updateTaskStatus(db, taskId, newStatus) {
-  // TODO: implement
+  const result = await db.collection('tasks').updateOne(
+    { _id: taskId },
+    { $set: { status: newStatus } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount
+  };
   throw new Error('updateTaskStatus not implemented');
 }
 
@@ -245,7 +253,15 @@ async function updateTaskStatus(db, taskId, newStatus) {
  * Hint: which array operator silently skips duplicates? It is NOT $push.
  */
 async function addTaskTag(db, taskId, tag) {
-  // TODO: implement
+  const result = await db.collection('tasks').updateOne(
+    { _id: taskId },
+    { $addToSet: { tags: tag } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount
+  };
   throw new Error('addTaskTag not implemented');
 }
 
