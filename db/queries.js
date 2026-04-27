@@ -110,7 +110,13 @@ async function listUserProjects(db, ownerId) {
  * Hint: insertOne again — just remember to add the defaults yourself.
  */
 async function createProject(db, projectData) {
-  // TODO: implement
+  return await db.collection('projects').insertOne({
+    ownerId: projectData.ownerId,
+    name: projectData.name,
+    description: projectData.description || '',
+    archived: false,
+    createdAt: new Date()
+  });
   throw new Error('createProject not implemented');
 }
 
@@ -130,7 +136,15 @@ async function createProject(db, projectData) {
  * Hint: updateOne with the $set operator.
  */
 async function archiveProject(db, projectId) {
-  // TODO: implement
+  const result = await db.collection('projects').updateOne(
+    { _id: projectId },
+    { $set: { archived: true } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount
+  };
   throw new Error('archiveProject not implemented');
 }
 
@@ -152,7 +166,13 @@ async function archiveProject(db, projectId) {
  *       the caller passed one. Then chain .sort({ priority: -1, createdAt: -1 }).
  */
 async function listProjectTasks(db, projectId, status) {
-  // TODO: implement
+  const filter = { projectId: projectId };
+  if (status) filter.status = status;
+
+  return await db.collection('tasks')
+    .find(filter)
+    .sort({ priority: -1, createdAt: -1 })
+    .toArray();
   throw new Error('listProjectTasks not implemented');
 }
 
@@ -178,7 +198,16 @@ async function listProjectTasks(db, projectId, status) {
  * Hint: insertOne. Apply defaults for any missing optional fields.
  */
 async function createTask(db, taskData) {
-  // TODO: implement
+  return await db.collection('tasks').insertOne({
+    ownerId: taskData.ownerId,
+    projectId: taskData.projectId,
+    title: taskData.title,
+    status: 'todo',
+    priority: taskData.priority || 1,
+    tags: taskData.tags || [],
+    subtasks: taskData.subtasks || [],
+    createdAt: new Date()
+  });
   throw new Error('createTask not implemented');
 }
 
