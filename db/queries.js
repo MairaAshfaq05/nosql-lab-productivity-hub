@@ -50,7 +50,7 @@ async function signupUser(db, userData) {
     name: userData.name,
     createdAt: new Date()
   });
-  throw new Error('signupUser not implemented');
+
 }
 
 /**
@@ -70,7 +70,7 @@ async function signupUser(db, userData) {
  */
 async function loginFindUser(db, email) {
   return await db.collection('users').findOne({ email: email });
-  throw new Error('loginFindUser not implemented');
+
 }
 
 /**
@@ -93,7 +93,7 @@ async function listUserProjects(db, ownerId) {
     .find({ ownerId: ownerId, archived: false })
     .sort({ createdAt: -1 })
     .toArray();
-  throw new Error('listUserProjects not implemented');
+
 }
 
 /**
@@ -117,7 +117,7 @@ async function createProject(db, projectData) {
     archived: false,
     createdAt: new Date()
   });
-  throw new Error('createProject not implemented');
+
 }
 
 /**
@@ -145,7 +145,7 @@ async function archiveProject(db, projectId) {
     matchedCount: result.matchedCount,
     modifiedCount: result.modifiedCount
   };
-  throw new Error('archiveProject not implemented');
+
 }
 
 /**
@@ -173,7 +173,7 @@ async function listProjectTasks(db, projectId, status) {
     .find(filter)
     .sort({ priority: -1, createdAt: -1 })
     .toArray();
-  throw new Error('listProjectTasks not implemented');
+
 }
 
 /**
@@ -208,7 +208,7 @@ async function createTask(db, taskData) {
     subtasks: taskData.subtasks || [],
     createdAt: new Date()
   });
-  throw new Error('createTask not implemented');
+
 }
 
 /**
@@ -233,7 +233,7 @@ async function updateTaskStatus(db, taskId, newStatus) {
     matchedCount: result.matchedCount,
     modifiedCount: result.modifiedCount
   };
-  throw new Error('updateTaskStatus not implemented');
+
 }
 
 /**
@@ -262,7 +262,7 @@ async function addTaskTag(db, taskId, tag) {
     matchedCount: result.matchedCount,
     modifiedCount: result.modifiedCount
   };
-  throw new Error('addTaskTag not implemented');
+
 }
 
 /**
@@ -291,7 +291,7 @@ async function removeTaskTag(db, taskId, tag) {
     matchedCount: result.matchedCount,
     modifiedCount: result.modifiedCount
   };
-  throw new Error('removeTaskTag not implemented');
+
 }
 
 /**
@@ -330,7 +330,7 @@ async function toggleSubtask(db, taskId, subtaskTitle, newDone) {
     matchedCount: result.matchedCount,
     modifiedCount: result.modifiedCount
   };
-  throw new Error('toggleSubtask not implemented');
+
 }
 
 /**
@@ -348,7 +348,7 @@ async function deleteTask(db, taskId) {
   const result = await db.collection('tasks').deleteOne({ _id: taskId });
 
   return { deletedCount: result.deletedCount };
-  throw new Error('deleteTask not implemented');
+
 }
 
 /**
@@ -381,8 +381,7 @@ async function searchNotes(db, ownerId, tags, projectId) {
   return await db.collection('notes')
     .find(filter)
     .sort({ createdAt: -1 })
-    .toArray();
-  throw new Error('searchNotes not implemented');
+    .toArray()
 }
 
 /**
@@ -419,8 +418,32 @@ async function searchNotes(db, ownerId, tags, projectId) {
  *       $unwind turns a 1-element array into the element itself.
  */
 async function projectTaskSummary(db, ownerId) {
-  // TODO: implement
-  throw new Error('projectTaskSummary not implemented');
+  async function projectTaskSummary(db, ownerId) {
+  return await db.collection('tasks').aggregate([
+    { $match: { ownerId: ownerId } },
+    { $group: {
+        _id: '$projectId',
+        todo:       { $sum: { $cond: [{ $eq: ['$status', 'todo'] }, 1, 0] } },
+        inProgress: { $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] } },
+        done:       { $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] } },
+        total:      { $sum: 1 }
+    }},
+    { $lookup: {
+        from: 'projects',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'project'
+    }},
+    { $unwind: '$project' },
+    { $project: {
+        _id: 1,
+        projectName: '$project.name',
+        todo: 1,
+        inProgress: 1,
+        done: 1,
+        total: 1
+    }}
+  ]).toArray();
 }
 
 /**
@@ -452,8 +475,27 @@ async function projectTaskSummary(db, ownerId) {
  *       you only want to look up 10 projects, not all of them.
  */
 async function recentActivityFeed(db, ownerId) {
-  // TODO: implement
-  throw new Error('recentActivityFeed not implemented');
+    return await db.collection('tasks').aggregate([
+    { $match: { ownerId: ownerId } },
+    { $sort: { createdAt: -1 } },
+    { $limit: 10 },
+    { $lookup: {
+        from: 'projects',
+        localField: 'projectId',
+        foreignField: '_id',
+        as: 'project'
+    }},
+    { $unwind: '$project' },
+    { $project: {
+        _id: 1,
+        title: 1,
+        status: 1,
+        priority: 1,
+        createdAt: 1,
+        projectId: 1,
+        projectName: '$project.name'
+    }}
+  ]).toArray();
 }
 
 // =============================================================================
