@@ -282,7 +282,15 @@ async function addTaskTag(db, taskId, tag) {
  * Hint: $pull.
  */
 async function removeTaskTag(db, taskId, tag) {
-  // TODO: implement
+  const result = await db.collection('tasks').updateOne(
+    { _id: taskId },
+    { $pull: { tags: tag } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount
+  };
   throw new Error('removeTaskTag not implemented');
 }
 
@@ -313,7 +321,15 @@ async function removeTaskTag(db, taskId, tag) {
  *       matched), and your $set path uses `subtasks.$.done`.
  */
 async function toggleSubtask(db, taskId, subtaskTitle, newDone) {
-  // TODO: implement
+  const result = await db.collection('tasks').updateOne(
+    { _id: taskId, 'subtasks.title': subtaskTitle },
+    { $set: { 'subtasks.$.done': newDone } }
+  );
+
+  return {
+    matchedCount: result.matchedCount,
+    modifiedCount: result.modifiedCount
+  };
   throw new Error('toggleSubtask not implemented');
 }
 
