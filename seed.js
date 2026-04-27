@@ -1,41 +1,50 @@
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
-const { connect } = require('./db/connection');
+const { MongoClient } = require('mongodb');
+
+const uri = process.env.DB_URI || 'mongodb://127.0.0.1:27017';
+const client = new MongoClient(uri);
+
+async function connect() {
+  await client.connect();
+  console.log('✓ Connected to MongoDB');
+  return client.db('projectdb'); // DB name
+}
 
 (async () => {
   const db = await connect();
 
-  // Clear old data
+  // ── CLEAR OLD DATA ───────────────────────────────────────
   await db.collection('users').deleteMany({});
   await db.collection('projects').deleteMany({});
   await db.collection('tasks').deleteMany({});
   await db.collection('notes').deleteMany({});
 
-  // Unique index on email
+  // ── UNIQUE INDEX ─────────────────────────────────────────
   await db.collection('users').createIndex({ email: 1 }, { unique: true });
 
-  // ── 2 USERS ──────────────────────────────────────────────
-  const hash1 = await bcrypt.hash('password123', 10);
-  const hash2 = await bcrypt.hash('password456', 10);
+  // ── USERS ────────────────────────────────────────────────
+  const hash1 = await bcrypt.hash('meow123', 10);
+  const hash2 = await bcrypt.hash('maira123', 10);
 
   const u1 = await db.collection('users').insertOne({
-    email: 'alice@example.com',
+    email: 'meow@example.com',
     passwordHash: hash1,
-    name: 'Alice',
+    name: 'meow',
     createdAt: new Date()
   });
 
   const u2 = await db.collection('users').insertOne({
-    email: 'bob@example.com',
+    email: 'maira@example.com',
     passwordHash: hash2,
-    name: 'Bob',
+    name: 'maira',
     createdAt: new Date()
   });
 
   const aliceId = u1.insertedId;
   const bobId   = u2.insertedId;
 
-  // ── 4 PROJECTS ───────────────────────────────────────────
+  // ── PROJECTS ─────────────────────────────────────────────
   const p1 = await db.collection('projects').insertOne({
     ownerId: aliceId,
     name: 'Final Year Project',
@@ -73,7 +82,7 @@ const { connect } = require('./db/connection');
   const app  = p3.insertedId;
   const blog = p4.insertedId;
 
-  // ── 5 TASKS ───────────────────────────────────────────────
+  // ── TASKS ────────────────────────────────────────────────
   await db.collection('tasks').insertOne({
     ownerId: aliceId,
     projectId: fyp,
@@ -83,9 +92,9 @@ const { connect } = require('./db/connection');
     tags: ['writing', 'research'],
     subtasks: [
       { title: 'Collect papers', done: true },
-      { title: 'Write review',   done: false }
+      { title: 'Write review', done: false }
     ],
-    dueDate: new Date('2024-04-30'),   // optional field — schema flexibility
+    dueDate: new Date('2024-04-30'),
     createdAt: new Date('2024-01-12')
   });
 
@@ -100,7 +109,6 @@ const { connect } = require('./db/connection');
       { title: 'Install Node', done: true },
       { title: 'Install MongoDB', done: true }
     ],
-    // no dueDate — shows schema flexibility
     createdAt: new Date('2024-01-11')
   });
 
@@ -126,7 +134,7 @@ const { connect } = require('./db/connection');
     priority: 3,
     tags: ['android', 'auth'],
     subtasks: [
-      { title: 'Design UI',         done: true },
+      { title: 'Design UI', done: true },
       { title: 'Connect to backend', done: false }
     ],
     createdAt: new Date('2024-03-05')
@@ -145,10 +153,10 @@ const { connect } = require('./db/connection');
     createdAt: new Date('2023-12-01')
   });
 
-  // ── 5 NOTES ───────────────────────────────────────────────
+  // ── NOTES ────────────────────────────────────────────────
   await db.collection('notes').insertOne({
     ownerId: aliceId,
-    projectId: fyp,               // attached to project
+    projectId: fyp,
     title: 'Supervisor meeting',
     body: 'Discussed methodology chapter.',
     tags: ['meeting', 'supervisor'],
@@ -166,7 +174,6 @@ const { connect } = require('./db/connection');
 
   await db.collection('notes').insertOne({
     ownerId: aliceId,
-    // no projectId — standalone note
     title: 'Books to read',
     body: 'Clean Code, The Pragmatic Programmer.',
     tags: ['personal', 'reading'],
@@ -184,7 +191,6 @@ const { connect } = require('./db/connection');
 
   await db.collection('notes').insertOne({
     ownerId: bobId,
-    // no projectId — standalone note
     title: 'Standup template',
     body: 'Yesterday / Today / Blockers',
     tags: ['meeting', 'template'],
@@ -192,7 +198,8 @@ const { connect } = require('./db/connection');
   });
 
   console.log('✓ Seed complete!');
-  console.log('  alice@example.com / password123');
-  console.log('  bob@example.com   / password456');
+  console.log('meow@example.com / meow123');
+  console.log('maira@example.com / maira123');
+
   process.exit(0);
 })();

@@ -70,7 +70,6 @@ async function signupUser(db, userData) {
  */
 async function loginFindUser(db, email) {
   return await db.collection('users').findOne({ email: email });
-
 }
 
 /**
