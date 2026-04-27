@@ -345,7 +345,9 @@ async function toggleSubtask(db, taskId, subtaskTitle, newDone) {
  * Hint: deleteOne.
  */
 async function deleteTask(db, taskId) {
-  // TODO: implement
+  const result = await db.collection('tasks').deleteOne({ _id: taskId });
+
+  return { deletedCount: result.deletedCount };
   throw new Error('deleteTask not implemented');
 }
 
@@ -369,7 +371,17 @@ async function deleteTask(db, taskId) {
  *       Build the filter conditionally based on whether projectId was passed.
  */
 async function searchNotes(db, ownerId, tags, projectId) {
-  // TODO: implement
+  const filter = {
+    ownerId: ownerId,
+    tags: { $in: tags }
+  };
+
+  if (projectId) filter.projectId = projectId;
+
+  return await db.collection('notes')
+    .find(filter)
+    .sort({ createdAt: -1 })
+    .toArray();
   throw new Error('searchNotes not implemented');
 }
 
