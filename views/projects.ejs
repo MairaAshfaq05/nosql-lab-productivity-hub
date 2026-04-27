@@ -1,0 +1,31 @@
+<%- include('_header', { pageTitle: 'Projects' }) %>
+<h1>Projects</h1>
+
+<section class="panel">
+  <h2>Create a project</h2>
+  <form method="POST" action="/projects" class="inline">
+    <input type="text" name="name" placeholder="Project name" required />
+    <input type="text" name="description" placeholder="Description (optional)" />
+    <button type="submit">Add</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Your projects <span class="meta">(query 3)</span></h2>
+  <% if (!projects || projects.length === 0) { %>
+    <p class="empty">No projects yet, or query 3 returned nothing.</p>
+  <% } else { %>
+    <ul class="project-list">
+      <% projects.forEach(p => { %>
+        <li>
+          <a href="/projects/<%= p._id %>"><strong><%= p.name %></strong></a>
+          <% if (p.description) { %><span class="meta"> — <%= p.description %></span><% } %>
+          <form method="POST" action="/projects/<%= p._id %>/archive" style="display:inline">
+            <button type="submit" class="link-btn small">archive</button>
+          </form>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+<%- include('_footer') %>

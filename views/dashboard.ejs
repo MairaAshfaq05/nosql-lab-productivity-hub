@@ -1,0 +1,45 @@
+<%- include('_header', { pageTitle: 'Dashboard' }) %>
+<h1>Dashboard</h1>
+
+<section class="panel">
+  <h2>Project Task Summary <span class="meta">(query 14 — <code>$lookup</code>)</span></h2>
+  <% if (!summary || summary.length === 0) { %>
+    <p class="empty">No projects yet, or query 14 returned nothing.</p>
+  <% } else { %>
+    <table>
+      <thead>
+        <tr><th>Project</th><th>Todo</th><th>In Progress</th><th>Done</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+        <% summary.forEach(row => { %>
+          <tr>
+            <td><%= row.projectName %></td>
+            <td><%= row.todo || 0 %></td>
+            <td><%= row.inProgress || 0 %></td>
+            <td><%= row.done || 0 %></td>
+            <td><strong><%= row.total || 0 %></strong></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<section class="panel">
+  <h2>Recent Activity <span class="meta">(query 15 — <code>$lookup</code>)</span></h2>
+  <% if (!activity || activity.length === 0) { %>
+    <p class="empty">No tasks yet, or query 15 returned nothing.</p>
+  <% } else { %>
+    <ul class="activity">
+      <% activity.forEach(t => { %>
+        <li>
+          <span class="tag tag-<%= t.status %>"><%= t.status %></span>
+          <strong><%= t.title %></strong>
+          <span class="meta">in <%= t.projectName %></span>
+          <span class="meta"><%= t.createdAt ? new Date(t.createdAt).toLocaleString() : '' %></span>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+<%- include('_footer') %>

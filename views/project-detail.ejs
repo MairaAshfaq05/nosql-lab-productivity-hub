@@ -1,0 +1,85 @@
+<%- include('_header', { pageTitle: project ? project.name : 'Project' }) %>
+<h1><%= project ? project.name : 'Project' %></h1>
+<p class="meta"><a href="/projects">← all projects</a></p>
+
+<section class="panel">
+  <h2>Add a task</h2>
+  <form method="POST" action="/tasks" class="stack">
+    <input type="hidden" name="projectId" value="<%= project._id %>" />
+    <input type="text" name="title" placeholder="Task title" required />
+    <input type="number" name="priority" placeholder="Priority (1-5)" min="1" max="5" value="1" />
+    <input type="text" name="tags" placeholder="Tags (comma separated)" />
+    <textarea name="subtasks" placeholder="Subtasks (one per line)"></textarea>
+    <button type="submit">Create task</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Tasks <span class="meta">(query 6)</span></h2>
+  <div class="filters">
+    <a href="/projects/<%= project._id %>" class="<%= !currentStatus ? 'active' : '' %>">All</a>
+    <a href="/projects/<%= project._id %>?status=todo" class="<%= currentStatus === 'todo' ? 'active' : '' %>">Todo</a>
+    <a href="/projects/<%= project._id %>?status=in-progress" class="<%= currentStatus === 'in-progress' ? 'active' : '' %>">In Progress</a>
+    <a href="/projects/<%= project._id %>?status=done" class="<%= currentStatus === 'done' ? 'active' : '' %>">Done</a>
+  </div>
+
+  <% if (!tasks || tasks.length === 0) { %>
+    <p class="empty">No tasks here, or query 6 returned nothing.</p>
+  <% } else { %>
+    <% tasks.forEach(t => { %>
+      <div class="task">
+        <div class="task-head">
+          <span class="tag tag-<%= t.status %>"><%= t.status %></span>
+          <strong><%= t.title %></strong>
+          <span class="meta">priority: <%= t.priority %></span>
+        </div>
+
+        <div class="task-tags">
+          <% (t.tags || []).forEach(tag => { %>
+            <span class="chip">
+              #<%= tag %>
+              <form method="POST" action="/tasks/<%= t._id %>/tags/remove" style="display:inline">
+                <input type="hidden" name="tag" value="<%= tag %>" />
+                <button type="submit" class="link-btn">×</button>
+              </form>
+            </span>
+          <% }) %>
+          <form method="POST" action="/tasks/<%= t._id %>/tags/add" class="inline tiny">
+            <input type="text" name="tag" placeholder="add tag" />
+            <button type="submit" class="link-btn">+</button>
+          </form>
+        </div>
+
+        <% if (t.subtasks && t.subtasks.length > 0) { %>
+          <ul class="subtasks">
+            <% t.subtasks.forEach(s => { %>
+              <li class="<%= s.done ? 'done' : '' %>">
+                <form method="POST" action="/tasks/<%= t._id %>/subtask/toggle" style="display:inline">
+                  <input type="hidden" name="subtaskTitle" value="<%= s.title %>" />
+                  <input type="hidden" name="done" value="<%= s.done ? 'false' : 'true' %>" />
+                  <button type="submit" class="link-btn"><%= s.done ? '☑' : '☐' %></button>
+                </form>
+                <%= s.title %>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+
+        <div class="task-actions">
+          <form method="POST" action="/tasks/<%= t._id %>/status" class="inline">
+            <select name="status">
+              <option value="todo" <%= t.status === 'todo' ? 'selected' : '' %>>todo</option>
+              <option value="in-progress" <%= t.status === 'in-progress' ? 'selected' : '' %>>in-progress</option>
+              <option value="done" <%= t.status === 'done' ? 'selected' : '' %>>done</option>
+            </select>
+            <button type="submit">Update</button>
+          </form>
+          <form method="POST" action="/tasks/<%= t._id %>/delete" style="display:inline">
+            <button type="submit" class="link-btn">delete</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</section>
+<%- include('_footer') %>

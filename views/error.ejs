@@ -1,0 +1,8 @@
+<%- include('_header', { pageTitle: title || 'Error' }) %>
+<div class="form-card">
+  <h1><%= title || 'Error' %></h1>
+  <p class="error"><%= message %></p>
+  <p>If this says <em>"&hellip; not implemented"</em>, that's the next query you need to write in <code>db/queries.js</code>.</p>
+  <p><a href="javascript:history.back()">← back</a></p>
+</div>
+<%- include('_footer') %>

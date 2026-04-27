@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Productivity Hub' %></title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand"><a href="/dashboard">Productivity Hub</a></div>
+      <% if (user) { %>
+        <nav>
+          <a href="/dashboard">Dashboard</a>
+          <a href="/projects">Projects</a>
+          <a href="/notes">Notes</a>
+          <form method="POST" action="/logout" style="display:inline">
+            <button type="submit" class="link-btn">Logout (<%= user.name %>)</button>
+          </form>
+        </nav>
+      <% } %>
+    </div>
+  </header>
+  <main>

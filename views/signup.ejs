@@ -1,0 +1,13 @@
+<%- include('_header', { pageTitle: 'Sign up' }) %>
+<div class="form-card">
+  <h1>Sign up</h1>
+  <% if (error) { %><div class="error"><%= error %></div><% } %>
+  <form method="POST" action="/signup">
+    <label>Name <input type="text" name="name" required /></label>
+    <label>Email <input type="email" name="email" required /></label>
+    <label>Password <input type="password" name="password" required minlength="6" /></label>
+    <button type="submit">Sign up</button>
+  </form>
+  <p>Have an account? <a href="/login">Log in</a></p>
+</div>
+<%- include('_footer') %>

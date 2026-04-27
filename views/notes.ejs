@@ -1,0 +1,33 @@
+<%- include('_header', { pageTitle: 'Notes' }) %>
+<h1>Notes</h1>
+
+<section class="panel">
+  <h2>Search by tags <span class="meta">(query 13)</span></h2>
+  <form method="GET" action="/notes" class="inline">
+    <input type="text" name="tags" value="<%= tagsParam %>" placeholder="comma-separated tags (e.g. ideas,urgent)" />
+    <button type="submit">Search</button>
+    <% if (tagsParam) { %><a href="/notes" class="meta">clear</a><% } %>
+  </form>
+</section>
+
+<section class="panel">
+  <h2><%= tagsParam ? 'Matching notes' : 'All notes' %></h2>
+  <% if (!notes || notes.length === 0) { %>
+    <p class="empty">No notes match.</p>
+  <% } else { %>
+    <ul class="note-list">
+      <% notes.forEach(n => { %>
+        <li>
+          <h3><%= n.title %></h3>
+          <p><%= n.body %></p>
+          <div class="task-tags">
+            <% (n.tags || []).forEach(tag => { %>
+              <span class="chip">#<%= tag %></span>
+            <% }) %>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+<%- include('_footer') %>
